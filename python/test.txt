@@ -1,0 +1,30 @@
+soit G un graphe ayant pour sommets
+{x1, ..., x_k, y_1, ..., y_k, z}  et tel que toutes les paires de sommets sont connectés à l'exception de x_i, y_i pour tout i in [k].
+
+soit H une orientation de G. Alors m(H) >= 3
+
+Par l'absurde, supposons que m(H) = 2
+
+fait 1: { x_i, y_i } est un dominant de H
+discuté cet aprèm
+
+fait 2: tout sommet différent z domine x_i ou y_i mais pas les deux:
+notons le sommet x_j
+s'il domine les deux, alors {x_i, y_i} ne domine pas v, contredit le fait 1.
+s'il n'en domine aucun: comme {x_j, y_j} est un dominant, y_j domine x_i et y_i
+et donc { x_i, y_j} ne domine pas y_j, contredit le fait 1.
+
+fait 3: pour tout i, x_i ou y_i domine z mais pas les deux.
+Supposons que x_i et y_i domine z.
+D'après l'hypothèse, il existe v différent de z tel que {z, v} est un dominant.
+donc v domine x_i et y_i. Contredit le fait 2.
+
+
+soit v un sommet qui domine le graphe avec z.
+Supposons que ce sommet est x_i.
+
+si (x_i, z) est une arête de H.
+
+
+
+

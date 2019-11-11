@@ -1,0 +1,99 @@
+//
+// Created by guillaume on 30/08/17.
+//
+
+#include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include "../include/Graph.h"
+#include "../include/Arena.h"
+#include "../include/Orientation.h"
+#include "../include/Tournament.h"
+
+namespace py = boost::python;
+
+template<class T>
+py::list iterable_to_py_list(const std::vector<T> & v) {
+    py::list l;
+    for (const T &  u : v)
+        l.append(u);
+    return l;
+}
+
+template< typename T >
+std::vector<T> py_list_to_vector(const py::object& iterable )
+{
+    return std::vector<T>( py::stl_input_iterator<T>(iterable),
+                             py::stl_input_iterator< T >( ));
+}
+
+py::list Graph_neighbors(const Graph & g, int i) {
+    return iterable_to_py_list(g.adj[i]);
+}
+
+py::list Arena_startingConf(const Arena & a) {
+    return iterable_to_py_list(a.startingConf());
+}
+
+py::list Arena_answer(const Arena & a, const py::object & conf) {
+    return iterable_to_py_list(a.answer(py_list_to_vector<int>(conf)));
+}
+
+bool hasEternalDomSet(const Graph & graph, int k, const std::string & rules) {
+    Arena arena = Arena::computeArena(graph, k, rules);
+    return arena.guardsWin();
+}
+
+
+
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Graph_alpha_overloads, Graph::alpha, 0, 1)
+
+BOOST_PYTHON_MODULE(eternaldom)
+{
+    py::class_<Graph>("graph", py::init<int>())
+        .def(py::init<const std::string &>())
+        .def("__len__", &Graph::noVertices)
+        .def(py::self_ns::str(py::self_ns::self))
+        .def("neighbors", Graph_neighbors)
+        .def("addArc", &Graph::addArc)
+        .def("hasArc", &Graph::hasArc)
+        .def("hasEdge", &Graph::hasArc)
+        .def("addEdge", &Graph::addEdge)
+        .def("removeArc", &Graph::removeArc)
+        .def("removeEdge", &Graph::removeEdge)
+        .def("reverse", &Graph::reverse)
+        .def("isAcyclic", &Graph::isAcyclic)
+        .def("isConnected", &Graph::isConnected)
+        .def("isEulerian", &Graph::isEulerian)
+        .def("inducedGraph", &Graph::inducedGraph)
+        .def("alpha", &Graph::alpha, Graph_alpha_overloads())
+        .def("mis", &Graph::mis)
+                //.def("isIsomorphicTo", &Graph::isIsomorphicTo)
+        .def("trivialCheck", &Graph::trivialCheck)
+        .def("hasEternalDomSet", hasEternalDomSet)
+        .def("save", &Graph::writeToFile)
+    ;
+    py::def("loadGraph", &Graph::readFromFile);
+
+    py::class_<Arena>("arena", py::no_init)
+        .def("guardsWin", &Arena::guardsWin)
+        .def("startingConf", Arena_startingConf)
+        .def("answer", Arena_answer)
+        ;
+
+    py::def("computeArena", &Arena::computeArena);
+
+
+
+    py::class_<OrientationGenerator>("orientations", py::init<std::string>())
+        .def(py::init<Graph>())
+        .def("__len__", &OrientationGenerator::nbIterations)
+        .def("__getitem__", &OrientationGenerator::computeIthOrientation)
+    ;
+
+    py::def("paley", paleyGraph);
+
+    py::class_<TransitiveTournaments>("transitivetournaments", py::init<int>())
+        .def("__len__", &TransitiveTournaments::nbIterations)
+        .def("__getitem__", &TransitiveTournaments::generateIth)
+    ;
+}
